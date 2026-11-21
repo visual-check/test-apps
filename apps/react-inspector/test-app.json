@@ -1,0 +1,1 @@
+{ "build": "yarn build-storybook", "storybooks": [{ "port": 9001, "staticDir": "storybook-static" }], "addon": false }
