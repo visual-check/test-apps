@@ -7,7 +7,6 @@ import {
   baseStyles,
   draggableStyles,
 } from '@dnd-kit/stories-shared/styles/sandbox';
-import {visualCheck} from '../../.storybook/visual-check';
 
 const meta: Meta<typeof DraggableApp> = {
   title: 'Draggable/Basic setup',
@@ -31,7 +30,6 @@ export const Example: Story = {
     }),
   ],
   parameters: {
-    ...visualCheck({disable: true}),
     codesandbox: {
       files: {
         'src/App.vue': draggableSource,

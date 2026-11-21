@@ -3,7 +3,6 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 import MultipleDroppableApp from './MultipleDroppableApp';
 import multipleDroppableSource from './MultipleDroppableApp.tsx?raw';
 import {baseStyles, draggableStyles, droppableStyles} from '@dnd-kit/stories-shared/styles/sandbox';
-import {visualCheck} from '../../../../.storybook/visual-check';
 
 const meta: Meta<typeof MultipleDroppableApp> = {
   title: 'React/Droppable/Multiple drop targets',
@@ -15,7 +14,6 @@ type Story = StoryObj<typeof MultipleDroppableApp>;
 
 export const Example: Story = {
   parameters: {
-    ...visualCheck({disable: true}),
     codesandbox: {
       files: {
         'src/App.tsx': multipleDroppableSource,

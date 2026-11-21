@@ -2,7 +2,6 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 
 import docs from './docs/SensorDocs.mdx';
 import {DraggableExample} from '../DraggableExample';
-import {visualCheck} from '../../../../.storybook/visual-check';
 
 const meta: Meta<typeof DraggableExample> = {
   title: 'React/Draggable/Sensors',
@@ -20,7 +19,4 @@ type Story = StoryObj<typeof DraggableExample>;
 
 export const Pointer: Story = {
   name: 'Default sensors',
-  parameters: {
-    ...visualCheck({disable: true}),
-  },
 };

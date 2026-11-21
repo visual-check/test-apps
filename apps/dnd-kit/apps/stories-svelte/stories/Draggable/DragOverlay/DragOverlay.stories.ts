@@ -7,7 +7,6 @@ import {
   baseStyles,
   draggableStyles,
 } from '@dnd-kit/stories-shared/styles/sandbox';
-import {visualCheck} from '../../../.storybook/visual-check';
 
 const meta: Meta<typeof DragOverlayApp> = {
   title: 'Draggable/Drag overlay',
@@ -19,7 +18,6 @@ type Story = StoryObj<typeof DragOverlayApp>;
 
 export const Example: Story = {
   parameters: {
-    ...visualCheck({disable: true}),
     codesandbox: {
       files: {
         'src/App.svelte': dragOverlaySource,

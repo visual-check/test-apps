@@ -8,7 +8,6 @@ import {
   draggableStyles,
   handleStyles,
 } from '@dnd-kit/stories-shared/styles/sandbox';
-import {visualCheck} from '../../../.storybook/visual-check';
 
 const meta: Meta<typeof DragHandlesApp> = {
   title: 'Draggable/Drag handles',
@@ -20,7 +19,6 @@ type Story = StoryObj<typeof DragHandlesApp>;
 
 export const Example: Story = {
   parameters: {
-    ...visualCheck({disable: true}),
     codesandbox: {
       files: {
         'src/App.svelte': dragHandlesSource,

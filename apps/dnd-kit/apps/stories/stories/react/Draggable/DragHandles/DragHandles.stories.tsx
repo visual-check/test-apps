@@ -3,7 +3,6 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 import docs from './docs/DragHandles.mdx';
 import {DraggableExample} from '../DraggableExample.tsx';
 import {PointerSensor, KeyboardSensor} from '@dnd-kit/dom';
-import {visualCheck} from '../../../../.storybook/visual-check';
 
 const meta: Meta<typeof DraggableExample> = {
   title: 'React/Draggable/Drag handles',
@@ -24,9 +23,6 @@ export const DragHandle: Story = {
   args: {
     handle: true,
   },
-  parameters: {
-    ...visualCheck({disable: true}),
-  },
 };
 
 export const DualActivators: Story = {
@@ -41,8 +37,5 @@ export const DualActivators: Story = {
       }),
       KeyboardSensor,
     ],
-  },
-  parameters: {
-    ...visualCheck({disable: true}),
   },
 };

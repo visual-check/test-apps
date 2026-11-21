@@ -1,7 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 
 import {IframeLists} from './IframeExample.tsx';
-import {visualCheck} from '../../../../.storybook/visual-check';
 
 const meta: Meta<typeof IframeLists> = {
   title: 'React/Sortable/Iframe',
@@ -17,9 +16,6 @@ export const Iframe: Story = {
     debug: false,
     itemCount: 6,
   },
-  parameters: {
-    ...visualCheck({disable: true}),
-  },
 };
 
 export const IframeTransformed: Story = {
@@ -28,8 +24,5 @@ export const IframeTransformed: Story = {
     debug: false,
     itemCount: 6,
     transform: true,
-  },
-  parameters: {
-    ...visualCheck({disable: true}),
   },
 };
