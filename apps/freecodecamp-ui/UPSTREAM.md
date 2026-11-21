@@ -24,7 +24,21 @@ run time and are never committed.
 
 - `.storybook/main.ts`: `@visual-check/storybook-addon` is registered after upstream's addons. Without the visual-check
   packages installed, Storybook warns that it can't resolve the addon, skips it and builds anyway.
+- `src/quiz-question/audio/audio.stories.tsx`, `src/quiz-question/quiz-question.stories.tsx` and
+  `src/quiz/quiz.stories.tsx`: four stories are disabled for visual-check (see below).
 
 ## Disabled stories
 
-None.
+These stories play an mp3 from `cdn.freecodecamp.org`. `src/quiz-question/audio/audio.tsx` shows the clip's duration
+once its metadata arrives (`loadedmetadata`), which can be after the capture; visual-check never waits for the
+network. The `with-audio-segment` stories set `finishTime`, show a fixed duration, and run. These stay disabled: the
+stories depend on the network.
+
+CI's first run broke the stories marked "yes". The other renders the same player and broke in a local `sb11` run.
+
+| Storybook | Story ID | File | Reason | Message | Broke in CI |
+|---|---|---|---|---|---|
+| `freecodecamp-ui` | `internal-components-audio--default` | `src/quiz-question/audio/audio.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `freecodecamp-ui` | `internal-components-audio--with-aria-label` | `src/quiz-question/audio/audio.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `freecodecamp-ui` | `components-quiz--with-audio` | `src/quiz/quiz.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `freecodecamp-ui` | `components-quizquestion--with-audio` | `src/quiz-question/quiz-question.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | no, same player |

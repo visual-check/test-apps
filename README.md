@@ -11,9 +11,9 @@ published are installed and tested in. The spec is visual-check's
 | Folder | Upstream | Pinned commit | License | Storybook | Package manager | Storybooks and ports | Stories | Disabled stories |
 |---|---|---|---|---|---|---|---|---|
 | `react-inspector` | storybookjs/react-inspector | `ae89c6c` | MIT | 9.1.4 | Yarn 4.17.1 | `react-inspector` on 9001 | 76 | none |
-| `freecodecamp-ui` | freeCodeCamp/ui | `b0c467b` | BSD-3-Clause | 10.6.7 + addon | pnpm 12.21.0 | `freecodecamp-ui` on 6006 | 112 | none |
-| `dnd-kit` | clauderic/dnd-kit | `ccaf3d5` | MIT | 9.1.21 | Bun 1.3.11 | `stories` on 6006, `stories-vanilla` on 6007, `stories-vue` on 6008, `stories-solid` on 6009, `stories-svelte` on 6010 | 111 (63, 10, 13, 12, 13) | none |
-| `sb11` | `apps/freecodecamp-ui`, upgraded | `b0c467b` | BSD-3-Clause | 11.0.0-beta.3 | pnpm 12.21.0 | `sb11` on 6006 | 112 | none |
+| `freecodecamp-ui` | freeCodeCamp/ui | `b0c467b` | BSD-3-Clause | 10.6.7 + addon | pnpm 12.21.0 | `freecodecamp-ui` on 6006 | 112 | 4 |
+| `dnd-kit` | clauderic/dnd-kit | `ccaf3d5` | MIT | 9.1.21 | Bun 1.3.11 | `stories` on 6006, `stories-vanilla` on 6007, `stories-vue` on 6008, `stories-solid` on 6009, `stories-svelte` on 6010 | 111 (63, 10, 13, 12, 13) | 33 (15, 4, 5, 4, 5) |
+| `sb11` | `apps/freecodecamp-ui`, upgraded | `b0c467b` | BSD-3-Clause | 11.0.0-beta.3 | pnpm 12.21.0 | `sb11` on 6006 | 112 | 4 |
 
 ## Storybook 11
 

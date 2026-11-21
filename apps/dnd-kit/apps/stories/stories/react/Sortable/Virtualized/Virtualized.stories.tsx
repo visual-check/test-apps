@@ -3,6 +3,7 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 import {ReactWindowExample} from './ReactWindowExample';
 import {ReactVirtualExample} from './ReactVirtualExample';
 import {ReactTinyVirtualListExample} from './ReactTinyVirtualListExample';
+import {visualCheck} from '../../../../.storybook/visual-check';
 
 const meta: Meta<typeof ReactVirtualExample> = {
   title: 'React/Sortable/Virtualized',
@@ -24,4 +25,7 @@ export const ReactTinyVirtualList: Story = {
 export const ReactVirtual: Story = {
   name: 'react-virtual',
   render: ReactVirtualExample,
+  parameters: {
+    ...visualCheck({disable: true}),
+  },
 };

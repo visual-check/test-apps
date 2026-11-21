@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import preview from "#.storybook/preview";
+import { visualCheck } from "#.storybook/visual-check";
 
 import { PrismFormatted } from "../prism-formatted";
 
@@ -720,6 +721,7 @@ export const WithAudio = meta.story({
 		],
 	},
 	parameters: {
+		...visualCheck({ disable: true }),
 		docs: {
 			source: {
 				code: `const App = () => {

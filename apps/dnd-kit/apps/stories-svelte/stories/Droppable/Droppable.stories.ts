@@ -9,6 +9,7 @@ import {
   draggableStyles,
   droppableStyles,
 } from '@dnd-kit/stories-shared/styles/sandbox';
+import {visualCheck} from '../../.storybook/visual-check';
 
 const meta: Meta<typeof DroppableApp> = {
   title: 'Droppable/Basic setup',
@@ -20,6 +21,7 @@ type Story = StoryObj<typeof DroppableApp>;
 
 export const Example: Story = {
   parameters: {
+    ...visualCheck({disable: true}),
     codesandbox: {
       files: {
         'src/App.svelte': droppableSource,

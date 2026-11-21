@@ -1,4 +1,5 @@
 import preview from "#.storybook/preview";
+import { visualCheck } from "#.storybook/visual-check";
 
 import { Audio } from "./audio";
 
@@ -19,6 +20,7 @@ export const Default = meta.story({
 		"aria-label": "Audio player",
 	},
 	parameters: {
+		...visualCheck({ disable: true }),
 		docs: {
 			source: {
 				code: `<Audio
@@ -36,6 +38,7 @@ export const WithAriaLabel = meta.story({
 		"aria-label": "Example audio clip",
 	},
 	parameters: {
+		...visualCheck({ disable: true }),
 		docs: {
 			source: {
 				code: `<Audio

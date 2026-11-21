@@ -27,7 +27,21 @@ run time and are never committed.
 - `package.json` and `pnpm-lock.yaml`: `storybook`, `@storybook/react-vite`, `@storybook/react`,
   `@storybook/addon-docs` and `@storybook/addon-a11y` at 11.0.0-beta.3 in place of 10.6.7. Upstream's `.storybook`
   builds on 11 unchanged.
+- `src/quiz-question/audio/audio.stories.tsx`, `src/quiz-question/quiz-question.stories.tsx` and
+  `src/quiz/quiz.stories.tsx`: four stories are disabled for visual-check (see below).
 
 ## Disabled stories
 
-None.
+These stories play an mp3 from `cdn.freecodecamp.org`. `src/quiz-question/audio/audio.tsx` shows the clip's duration
+once its metadata arrives (`loadedmetadata`), which can be after the capture; visual-check never waits for the
+network. The `with-audio-segment` stories set `finishTime`, show a fixed duration, and run. These stay disabled: the
+stories depend on the network.
+
+CI's first run broke the stories marked "yes". The other renders the same player and broke in a local `sb11` run.
+
+| Storybook | Story ID | File | Reason | Message | Broke in CI |
+|---|---|---|---|---|---|
+| `sb11` | `internal-components-audio--default` | `src/quiz-question/audio/audio.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `sb11` | `internal-components-audio--with-aria-label` | `src/quiz-question/audio/audio.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `sb11` | `components-quiz--with-audio` | `src/quiz/quiz.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `sb11` | `components-quizquestion--with-audio` | `src/quiz-question/quiz-question.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | no, same player |

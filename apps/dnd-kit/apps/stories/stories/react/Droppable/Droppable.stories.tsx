@@ -4,6 +4,7 @@ import DroppableApp from './DroppableApp.tsx';
 import droppableSource from './DroppableApp.tsx?raw';
 import {baseStyles, draggableStyles, droppableStyles} from '@dnd-kit/stories-shared/styles/sandbox';
 import docs from './docs/DroppableDocs.mdx';
+import {visualCheck} from '../../../.storybook/visual-check';
 
 const meta: Meta<typeof DroppableApp> = {
   title: 'React/Droppable',
@@ -27,4 +28,7 @@ type Story = StoryObj<typeof DroppableApp>;
 
 export const Example: Story = {
   name: 'Example',
+  parameters: {
+    ...visualCheck({disable: true}),
+  },
 };

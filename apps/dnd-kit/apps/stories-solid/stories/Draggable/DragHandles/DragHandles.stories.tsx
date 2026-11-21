@@ -7,6 +7,7 @@ import {
   draggableStyles,
   handleStyles,
 } from '@dnd-kit/stories-shared/styles/sandbox';
+import {visualCheck} from '../../../.storybook/visual-check';
 
 const meta: Meta = {
   title: 'Draggable/Drag handles',
@@ -28,6 +29,7 @@ type Story = StoryObj;
 
 export const Example: Story = {
   parameters: {
+    ...visualCheck({disable: true}),
     codesandbox: {
       files: {
         'src/App.tsx': dragHandlesSource,

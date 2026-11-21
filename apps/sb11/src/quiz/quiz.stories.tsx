@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import preview from "#.storybook/preview";
+import { visualCheck } from "#.storybook/visual-check";
 
 import { Quiz } from "./quiz";
 import { useQuiz } from "./use-quiz";
@@ -955,6 +956,7 @@ export const WithAudio = meta.story({
 	render: QuizWithAudio,
 	args: {},
 	parameters: {
+		...visualCheck({ disable: true }),
 		docs: {
 			source: {
 				code: `

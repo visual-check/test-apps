@@ -37,8 +37,73 @@ the 22.17 visual-check needs. The visual-check packages are installed only at ru
 
 ## Local changes
 
-None.
+- The stories files listed under "Disabled stories": each disabled story gets
+  `parameters: { ...visualCheck({disable: true}) }`, and the file imports `visualCheck` from its Storybook's
+  `.storybook/visual-check`.
 
 ## Disabled stories
 
-None.
+### Animated icons
+
+`apps/stories-shared/styles/sandbox.ts` draws `.btn::before` (a `background-image`) and `.droppable::after` (a
+`content: url()`) as SVG data URLs whose `<animate>` repeats indefinitely, on a 4 s and a 3 s loop. visual-check doesn't
+freeze SMIL animation in CSS images ([visual-check#143](https://github.com/visual-check/visual-check/issues/143)), so a
+story that renders either icon passes or breaks depending on where the loop is at capture. They come back when #143 is
+fixed.
+
+CI's first run broke the stories marked "yes". The others render the same icon and are disabled before they flake: an
+element whose computed `::before` `background-image` or `::after` `content` has `<animate>`, found by opening every
+story of the five Storybooks in Chromium.
+
+| Storybook | Story ID | File | Reason | Message | Broke in CI |
+|---|---|---|---|---|---|
+| `stories-solid` | `draggable-basic-setup--example` | `apps/stories-solid/stories/Draggable/Draggable.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories-solid` | `draggable-drag-handles--example` | `apps/stories-solid/stories/Draggable/DragHandles/DragHandles.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories-solid` | `droppable-basic-setup--example` | `apps/stories-solid/stories/Droppable/Droppable.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories-solid` | `droppable-multiple-drop-targets--example` | `apps/stories-solid/stories/Droppable/MultipleDroppable/MultipleDroppable.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | no, same icon |
+| `stories-svelte` | `draggable-basic-setup--example` | `apps/stories-svelte/stories/Draggable/Draggable.stories.ts` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories-svelte` | `draggable-drag-handles--example` | `apps/stories-svelte/stories/Draggable/DragHandles/DragHandles.stories.ts` | `changed-after-capture` | doesn't render the same way twice | no, same icon |
+| `stories-svelte` | `draggable-drag-overlay--example` | `apps/stories-svelte/stories/Draggable/DragOverlay/DragOverlay.stories.ts` | `changed-after-capture` | doesn't render the same way twice | no, same icon |
+| `stories-svelte` | `droppable-basic-setup--example` | `apps/stories-svelte/stories/Droppable/Droppable.stories.ts` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories-svelte` | `droppable-multiple-drop-targets--example` | `apps/stories-svelte/stories/Droppable/MultipleDroppable/MultipleDroppable.stories.ts` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories-vanilla` | `draggable-basic-setup--example` | `apps/stories-vanilla/stories/Draggable/Draggable.stories.ts` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories-vanilla` | `draggable-drag-handle--example` | `apps/stories-vanilla/stories/Draggable/DragHandle/DragHandle.stories.ts` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories-vanilla` | `droppable-basic-setup--example` | `apps/stories-vanilla/stories/Droppable/Droppable.stories.ts` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories-vanilla` | `droppable-multiple-drop-targets--example` | `apps/stories-vanilla/stories/Droppable/MultipleDroppable/MultipleDroppable.stories.ts` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories-vue` | `draggable-basic-setup--example` | `apps/stories-vue/stories/Draggable/Draggable.stories.ts` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories-vue` | `draggable-drag-handles--example` | `apps/stories-vue/stories/Draggable/DragHandles/DragHandles.stories.ts` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories-vue` | `draggable-drag-overlay--example` | `apps/stories-vue/stories/Draggable/DragOverlay/DragOverlay.stories.ts` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories-vue` | `droppable-basic-setup--example` | `apps/stories-vue/stories/Droppable/Droppable.stories.ts` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories-vue` | `droppable-multiple-drop-targets--example` | `apps/stories-vue/stories/Droppable/MultipleDroppable/MultipleDroppable.stories.ts` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories` | `react-draggable--example` | `apps/stories/stories/react/Draggable/Draggable.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories` | `react-draggable-drag-handles--drag-handle` | `apps/stories/stories/react/Draggable/DragHandles/DragHandles.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories` | `react-draggable-drag-handles--dual-activators` | `apps/stories/stories/react/Draggable/DragHandles/DragHandles.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories` | `react-draggable-drag-overlay--drag-overlay` | `apps/stories/stories/react/Draggable/DragOverlay/DragOverlay.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories` | `react-draggable-modifiers--vertical-axis` | `apps/stories/stories/react/Draggable/Modifiers/Modifiers.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | no, same icon |
+| `stories` | `react-draggable-modifiers--horizontal-axis` | `apps/stories/stories/react/Draggable/Modifiers/Modifiers.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | no, same icon |
+| `stories` | `react-draggable-modifiers--window-modifier` | `apps/stories/stories/react/Draggable/Modifiers/Modifiers.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | no, same icon |
+| `stories` | `react-draggable-modifiers--container-modifier` | `apps/stories/stories/react/Draggable/Modifiers/Modifiers.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | no, same icon |
+| `stories` | `react-draggable-modifiers--snap-modifier-example` | `apps/stories/stories/react/Draggable/Modifiers/Modifiers.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories` | `react-draggable-sensors--pointer` | `apps/stories/stories/react/Draggable/Sensors/Sensors.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories` | `react-droppable--example` | `apps/stories/stories/react/Droppable/Droppable.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | yes |
+| `stories` | `react-droppable-multiple-drop-targets--example` | `apps/stories/stories/react/Droppable/MultipleDroppable/MultipleDroppable.stories.tsx` | `changed-after-capture` | doesn't render the same way twice | yes |
+
+### Iframe transitions
+
+These stories render their lists in a same-origin iframe. Once `@measured/auto-frame-component` copies the page's
+styles in, CSS transitions run inside the iframe after capture, and visual-check doesn't settle them
+([visual-check#144](https://github.com/visual-check/visual-check/issues/144)). They come back when #144 is fixed.
+
+| Storybook | Story ID | File | Reason | Message |
+|---|---|---|---|---|
+| `stories` | `react-sortable-iframe--iframe` | `apps/stories/stories/react/Sortable/Iframe/Iframe.stories.tsx` | `changed-after-capture` | doesn't render the same way twice |
+| `stories` | `react-sortable-iframe--iframe-transformed` | `apps/stories/stories/react/Sortable/Iframe/Iframe.stories.tsx` | `changed-after-capture` | doesn't render the same way twice |
+
+### Too tall
+
+The story renders all 1000 rows at 72 px each, so the page is 72,064 px tall, over Chromium's 32,767 px capture limit.
+That's the story's own size, not a visual-check bug; it stays disabled.
+
+| Storybook | Story ID | File | Reason | Message |
+|---|---|---|---|---|
+| `stories` | `react-sortable-virtualized--react-virtual` | `apps/stories/stories/react/Sortable/Virtualized/Virtualized.stories.tsx` | `too-tall` | The capture is 1280 × 72064 device pixels, over 32,767 on a side. |
