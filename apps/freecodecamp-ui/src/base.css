@@ -1,0 +1,169 @@
+@import "./colors.css";
+
+/* https://github.com/tailwindlabs/tailwindcss/blob/3.4/src/css/preflight.css */
+@tailwind base;
+
+@layer base {
+	html {
+		@apply text-md;
+	}
+
+	:focus-visible {
+		@apply outline outline-3 outline-focus-outline-color outline-offset-0;
+	}
+
+	a {
+		/* Override Tailwind's default `text-decoration` rule. */
+		/* https://github.com/tailwindlabs/tailwindcss/blob/3.4/src/css/preflight.css#L92 */
+		@apply underline;
+		/* This is required in order to improve text readability in Arabic */
+		text-underline-position: under;
+	}
+	@supports not (text-underline-position: under) {
+		a {
+			text-underline-offset: 0.1em;
+		}
+	}
+
+	code {
+		@apply bg-background-tertiary text-foreground-tertiary;
+	}
+	:not(pre) > code {
+		@apply border-1 border-gray-450 px-[4px] py-[1px];
+	}
+
+	pre {
+		color: inherit;
+		background-color: inherit;
+		border: none;
+		border-radius: 0;
+		display: block;
+		padding: 9.5px;
+		margin: 0 0 10px;
+		font-size: 17px;
+		line-height: 1.42857143;
+		word-break: break-all;
+		word-wrap: break-word;
+	}
+
+	pre code {
+		padding: 0;
+		font-size: inherit;
+		color: inherit;
+		white-space: pre-wrap;
+		background-color: transparent;
+		border-radius: 0;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6,
+	p {
+		margin-bottom: 12.5px;
+	}
+
+	/* Override the Tailwind's placeholder text color. */
+	/* https://github.com/tailwindlabs/tailwindcss/blob/3.4/src/css/preflight.css#L335 */
+	input::placeholder,
+	textarea::placeholder {
+		@apply text-foreground-quaternary opacity-80;
+	}
+
+	label {
+		display: inline-block;
+		max-width: 100%;
+		margin-bottom: 5px;
+	}
+
+	blockquote {
+		padding: 10px 20px;
+		margin: 0 0 20px;
+		font-size: 17.5px;
+		border-left: 5px solid var(--background-quaternary);
+	}
+
+	ul {
+		margin-top: 0;
+		margin-bottom: 10px;
+		padding-inline-start: 40px;
+		list-style-type: disc;
+	}
+
+	ol {
+		margin-top: 0;
+		margin-bottom: 10px;
+		padding-inline-start: 40px;
+		list-style-type: decimal;
+	}
+
+	hr {
+		margin-top: 20px;
+		margin-bottom: 20px;
+		border: 0;
+		border-top: 1px solid var(--background-quaternary);
+	}
+
+	/* This is to override Tailwind as it sets the font-weight to `bolder`.*/
+	b,
+	strong {
+		font-weight: bold;
+	}
+
+	legend {
+		display: block;
+		width: 100%;
+		padding: 0;
+		margin-bottom: 20px;
+		font-size: 21px;
+		line-height: inherit;
+	}
+
+	table {
+		display: inline-block;
+		overflow: auto;
+	}
+
+	table thead {
+		display: table-header-group;
+		vertical-align: middle;
+		border-color: inherit;
+	}
+
+	table th {
+		font-weight: 700;
+	}
+
+	table th,
+	table td {
+		padding: 6px 13px;
+		border: 1px solid var(--foreground-secondary);
+		text-align: center;
+	}
+
+	table tbody tr:nth-of-type(odd) {
+		background-color: var(--background-tertiary);
+	}
+
+	table td:has(ruby) {
+		padding-block: 8px;
+	}
+
+	p:has(ruby),
+	li:has(> ruby) {
+		padding: 0.5rem 0;
+	}
+
+	ruby {
+		font-size: 1.3rem;
+	}
+
+	rt {
+		font-size: 0.9rem;
+	}
+}
+
+@tailwind components;
+@tailwind utilities;

@@ -1,0 +1,23 @@
+# Dependency directories
+node_modules/
+
+# Storybook build output
+types/
+dist/
+storybook-static/
+debug-storybook.log
+
+# dotenv environment variables file
+.env
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# IDE-specific files and folders
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*~
