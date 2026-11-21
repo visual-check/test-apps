@@ -1,0 +1,134 @@
+# The test apps on visual-check's packed packages (visual-check's docs/prd/17-test-apps.md › A run, Jobs). Each app
+# installs the packages with its own package manager, builds and serves its Storybooks with scripts/setup-app.sh, and
+# runs `test` against its committed baselines through visual-check/action. freecodecamp-ui runs through the Action's
+# reusable workflow, sharded, with its consistency job. react-inspector also runs from a node job container with the
+# docker CLI added, where the browser joins that container's network.
+#
+# This repository's CI calls it, and so does visual-check's on every pull request. A workflow called from another
+# repository's workflow gets that repository's github context, so every checkout here names this repository: that
+# gives the caller's commit when this repository calls it, and main otherwise.
+name: Test apps
+
+on:
+  workflow_call:
+    inputs:
+      artifact:
+        description: >-
+          The artifact of this run that holds the packed packages and the browser image, as visual-check's pack
+          workflow uploads it.
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # Each app through the Action. Windows adds a windows-2025 entry per app (visual-check#86).
+  app:
+    name: ${{ matrix.app }} (${{ matrix.runner }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { app: react-inspector, runner: ubuntu-24.04 }
+          - { app: dnd-kit, runner: ubuntu-24.04 }
+          - { app: sb11, runner: ubuntu-24.04 }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: visual-check/test-apps
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: apps/${{ matrix.app }}/.nvmrc
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ inputs.artifact }}
+          path: ${{ runner.temp }}/packages
+      - name: Set up the app
+        working-directory: apps/${{ matrix.app }}
+        run: ../../scripts/setup-app.sh "$RUNNER_TEMP/packages"
+      - name: visual-check
+        uses: visual-check/action@d22b2b78c1f46774f69318e08a855300c9df4fee # main
+        with:
+          working-directory: apps/${{ matrix.app }}
+      # The Action names its report artifact visual-check-report in every app's job, and each upload overwrites the
+      # last, so this one names the app.
+      - name: Upload the report
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-apps-report-${{ matrix.app }}-${{ matrix.runner }}
+          path: apps/${{ matrix.app }}/.visual-check/report/
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # Actions mounts the Docker socket into the job container, so the CLI finds its own container and the browser joins
+  # its network, where the Storybook is served on loopback.
+  job-container:
+    name: react-inspector (node job container)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    container:
+      image: node:24-bookworm@sha256:9d266751ca3d7fdbe651c878ffd5ad0a42fed49a18c283509267c97f025b7496
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: visual-check/test-apps
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: apps/react-inspector/.nvmrc
+      # Docker's own apt repository for Debian, the image's base: the CLI only, no daemon.
+      - name: Install the docker CLI
+        run: |
+          repository=https://download.docker.com/linux/debian
+          install -m 0755 -d /etc/apt/keyrings
+          curl -fsSL --retry 5 "$repository/gpg" -o /etc/apt/keyrings/docker.asc
+          chmod a+r /etc/apt/keyrings/docker.asc
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] $repository bookworm stable" \
+            > /etc/apt/sources.list.d/docker.list
+          apt-get -o Acquire::Retries=5 update
+          apt-get -o Acquire::Retries=5 install --yes --no-install-recommends docker-ce-cli
+      # In a job container, the runner.temp expression has been known to give the host's path rather than the
+      # container's, so the packages go to a path relative to the workspace, which both steps resolve in the container.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ inputs.artifact }}
+          path: .packages
+      - name: Set up the app
+        working-directory: apps/react-inspector
+        run: ../../scripts/setup-app.sh "$GITHUB_WORKSPACE/.packages"
+      - name: visual-check
+        uses: visual-check/action@d22b2b78c1f46774f69318e08a855300c9df4fee # main
+        with:
+          working-directory: apps/react-inspector
+      - name: Upload the report
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-apps-report-react-inspector-job-container
+          path: apps/react-inspector/.visual-check/report/
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # The sharded run, through the Action's reusable workflow: a consistency job, then shard jobs that wait for it, each
+  # setting the app up itself. Their report artifacts' names already differ by shard.
+  sharded:
+    name: freecodecamp-ui, sharded
+    uses: visual-check/action/.github/workflows/test.yml@d22b2b78c1f46774f69318e08a855300c9df4fee # main
+    with:
+      repository: visual-check/test-apps
+      artifact: ${{ inputs.artifact }}
+      shards: 3
+      node-version-file: apps/freecodecamp-ui/.nvmrc
+      working-directory: apps/freecodecamp-ui
+      setup: ../../scripts/setup-app.sh "$RUNNER_TEMP/${{ inputs.artifact }}"
