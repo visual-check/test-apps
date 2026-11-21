@@ -8,6 +8,9 @@ MIT (see `LICENSE`).
 
 - `.github/`: upstream's CI never runs from a subfolder.
 
+Nothing else is left out: upstream's own `.gitignore` hides three of its tracked files,
+`packages/{abstract,geometry,state}/.eslintrc.js`, so they're added with `git add -f`. A new copy must do the same.
+
 ## Storybooks
 
 A monorepo with five Storybooks, each on upstream's own dev port:
