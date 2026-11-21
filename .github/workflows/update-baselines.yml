@@ -37,6 +37,7 @@ jobs:
           name: visual-check-packages
           path: ${{ runner.temp }}/packages
       - name: Set up the app
+        id: setup
         working-directory: apps/${{ matrix.app }}
         run: ../../scripts/setup-app.sh "$RUNNER_TEMP/packages"
       - name: Update the baselines
@@ -44,11 +45,13 @@ jobs:
         run: env -u CI ./node_modules/.bin/visual-check update --all
       # A story `update` couldn't write has no baseline, so this fails too, on its consistency check.
       - name: Test against them
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         working-directory: apps/${{ matrix.app }}
         run: ./node_modules/.bin/visual-check test
+      # Two search paths make the artifact's root their common ancestor, apps/<app>, so `gh run download -D apps/<app>`
+      # restores the baselines in place. include-hidden-files lets the second path enter .visual-check.
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         with:
           name: baselines-${{ matrix.app }}
           path: |
