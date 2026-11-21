@@ -1,0 +1,15 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Only sb11's Storybook moves: to each newer Storybook 11 prerelease, then to 11's stable releases. Every other app stays at the commit it was copied at.",
+  "enabledManagers": ["npm"],
+  "includePaths": ["apps/sb11/**"],
+  "packageRules": [
+    { "matchPackageNames": ["*"], "enabled": false },
+    {
+      "matchPackageNames": ["storybook", "@storybook/*"],
+      "enabled": true,
+      "groupName": "Storybook 11",
+      "allowedVersions": "/^11\\./"
+    }
+  ]
+}

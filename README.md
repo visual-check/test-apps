@@ -15,6 +15,12 @@ published are installed and tested in. The spec is visual-check's
 | `dnd-kit` | clauderic/dnd-kit | `ccaf3d5` | MIT | 9.1.21 | Bun 1.3.11 | `stories` on 6006, `stories-vanilla` on 6007, `stories-vue` on 6008, `stories-solid` on 6009, `stories-svelte` on 6010 | 111 (63, 10, 13, 12, 13) | none |
 | `sb11` | `apps/freecodecamp-ui`, upgraded | `b0c467b` | BSD-3-Clause | 11.0.0-beta.3 | pnpm 12.21.0 | `sb11` on 6006 | 112 | none |
 
+## Storybook 11
+
+`sb11` is `freecodecamp-ui` on Storybook 11. `renovate.json` moves its Storybook packages to each newer Storybook 11
+prerelease, then to 11's stable releases, and leaves everything else alone. Renovate needs the
+[Renovate GitHub App](https://github.com/apps/renovate) installed on this repository.
+
 ## A run
 
 1. visual-check's pack workflow packs its packages from one commit and uploads them, with the browser image, as one
