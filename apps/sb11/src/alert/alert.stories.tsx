@@ -1,0 +1,93 @@
+import React from "react";
+import { Button } from "../button";
+import preview from "#.storybook/preview";
+import { Alert } from "./alert";
+
+const meta = preview.meta({
+	title: "Components/Alert",
+	component: Alert,
+	tags: ["autodocs"],
+	argTypes: {
+		children: { control: { type: "text" } },
+		className: { control: { type: "text" } },
+	},
+});
+
+export const Success = meta.story({
+	args: {
+		children: "Hello, Alert!",
+		variant: "success",
+	},
+});
+
+export const Info = meta.story({
+	args: {
+		children: "Hello, Alert!",
+		variant: "info",
+	},
+});
+
+export const Warning = meta.story({
+	args: {
+		children: "Hello, Alert!",
+		variant: "warning",
+	},
+});
+
+export const Danger = meta.story({
+	args: {
+		children: "Hello, Alert!",
+		variant: "danger",
+	},
+});
+
+export const LongText = meta.story({
+	args: {
+		variant: "success",
+		children:
+			"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet animi commodi cumque dicta ducimus eum iure, maiores mollitia, odit porro quas quod rerum soluta sunt tempora unde, vel voluptas voluptates.",
+	},
+});
+
+export const WithHeadingAndParagraphs = meta.story({
+	args: {
+		variant: "info",
+		children: (
+			<>
+				<h4>
+					<strong>Some Heading Text</strong>
+				</h4>
+				<p>
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet animi
+					commodi cumque dicta ducimus eum iure, maiores mollitia, odit porro
+					quas quod rerum soluta sunt tempora unde, vel voluptas voluptates.
+				</p>
+				<p>
+					Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet animi
+					commodi cumque dicta ducimus eum iure, maiores mollitia, odit porro
+					quas quod rerum soluta sunt tempora unde, vel voluptas voluptates.
+				</p>
+			</>
+		),
+	},
+});
+
+export const WithButtonAndLink = meta.story({
+	args: {
+		variant: "info",
+		children: (
+			<>
+				<p>
+					This is an alert with a{" "}
+					<a href="#test" onClick={(e) => e.preventDefault()}>
+						link
+					</a>{" "}
+					and a button.
+				</p>
+				<Button>Click me</Button>
+			</>
+		),
+	},
+});
+
+export default meta;

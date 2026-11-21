@@ -1,0 +1,41 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Introduction" />
+
+# freeCodeCamp's UI Component Library
+
+Welcome to freeCodeCamp's UI component library. This is a collection of reusable
+components that can be used to build user interfaces for freeCodeCamp projects.
+
+## Installation
+
+- Run the following command to install the library in your app:
+
+```bash
+pnpm install @freecodecamp/ui
+```
+
+- Import the library's base stylesheet in your app, then import your app CSS after so the library's defaults can be overridden:
+
+```tsx
+// app.tsx
+import "@freecodecamp/ui/dist/base.css";
+import "./my-app.css";
+```
+
+- Use the `getThemingClass` util to get a CSS class for theming, and add the class to the `body` element:
+
+```tsx
+import { getThemingClass } from "@freecodecamp/ui";
+
+const MyApp = () => {
+	const cls = getThemingClass();
+
+	return <body className={cls}></body>;
+};
+```
+
+## Where to Get Help
+
+- Report bugs or request features on [our GitHub repository](https://github.com/freeCodeCamp/ui).
+- Ask questions on [our forum](https://forum.freecodecamp.org/) or [our Discord server](https://discord.gg/PRyKn3Vbay).

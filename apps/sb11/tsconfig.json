@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "module": "ES6",
+    "target": "ES2017",
+    "sourceMap": true,
+    "jsx": "react",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": ["vitest/globals"],
+    "paths": {
+      "#*": ["./*", "./*.ts", "./*.tsx"]
+    }
+  }
+}

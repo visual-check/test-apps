@@ -1,0 +1,1 @@
+{ "build": "pnpm run build-storybook", "storybooks": [{ "port": 6006, "staticDir": "storybook-static" }], "addon": false }
