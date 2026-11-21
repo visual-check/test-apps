@@ -27,14 +27,28 @@ tools=${RUNNER_TEMP:-${TMPDIR:-/tmp}}/test-apps-tools
 export HUSKY=0 SKIP_INSTALL_SIMPLE_GIT_HOOKS=1 STORYBOOK_DISABLE_TELEMETRY=1 TURBO_TELEMETRY_DISABLED=1
 export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 
-# test-app.json, read once so that set -e stops the script if it's missing or broken.
-build=$(node -p "require('./test-app.json').build")
-addon=$(node -p "require('./test-app.json').addon")
-storybooks=$(node -e "for (const { port, staticDir } of require('./test-app.json').storybooks) console.log(port, staticDir)")
-if [[ -z $storybooks ]]; then
-  echo 'test-app.json names no Storybooks.' >&2
-  exit 1
-fi
+# test-app.json, read up front so that set -e stops the script if it's missing, broken or lacks a key.
+build=$(node -p "
+  const { build } = require('./test-app.json');
+  if (typeof build !== 'string' || build === '') throw new Error('test-app.json: build must be a non-empty string.');
+  build
+")
+addon=$(node -p "
+  const { addon } = require('./test-app.json');
+  if (typeof addon !== 'boolean') throw new Error('test-app.json: addon must be true or false.');
+  addon
+")
+storybooks=$(node -e "
+  const { storybooks } = require('./test-app.json');
+  if (!Array.isArray(storybooks) || storybooks.length === 0)
+    throw new Error('test-app.json: storybooks must be a non-empty array.');
+  for (const [i, { port, staticDir }] of storybooks.entries()) {
+    if (!Number.isInteger(port)) throw new Error('test-app.json: storybooks[' + i + '].port must be an integer.');
+    if (typeof staticDir !== 'string' || staticDir === '')
+      throw new Error('test-app.json: storybooks[' + i + '].staticDir must be a non-empty string.');
+    console.log(port, staticDir);
+  }
+")
 
 # Copies the one packed tarball of @visual-check/<name> into the app as .visual-check-packages/<name>.tgz.
 copy_package() {
@@ -104,8 +118,8 @@ case $package_manager in
       specs+=("./.visual-check-packages/$name.tgz")
     done
     # Bun 1.3.11 resolves @visual-check/cli's peer dependency @visual-check/chromium from the registry even when
-    # chromium is installed from its tarball, in the same `bun add` or an earlier one. Overrides point it at the
-    # tarball. Drop them once Bun fixes this.
+    # chromium is installed from its tarball, in the same `bun add` or an earlier one. Overrides point every
+    # @visual-check package at its tarball. Drop them once Bun fixes this.
     node -e '
       const fs = require("fs");
       const manifest = JSON.parse(fs.readFileSync("package.json", "utf8"));
@@ -145,7 +159,9 @@ done <<< "$storybooks"
 for i in "${!ports[@]}"; do
   port=${ports[$i]}
   url="http://127.0.0.1:$port/index.json"
-  for _ in $(seq 60); do
+  # A deadline, not a count of tries, so that slow curls don't stretch the 60 s.
+  deadline=$((SECONDS + 60))
+  while ((SECONDS < deadline)); do
     if ! kill -0 "${pids[$i]}" 2> /dev/null; then
       echo "The server for $url exited:" >&2
       cat "$tools/http-server-$port.log" >&2
