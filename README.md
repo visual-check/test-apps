@@ -23,13 +23,24 @@ prerelease, then to 11's stable releases, and leaves everything else alone. Reno
 
 ## A run
 
-1. visual-check's pack workflow packs its packages from one commit and uploads them, with the browser image, as one
-   artifact.
+1. visual-check's `pack.yml` packs its packages from one commit and uploads them, with the browser image, as one
+   artifact: from visual-check's `main` for this repository's own CI (`.github/workflows/ci.yml`), or from the pull
+   request's commit when visual-check's CI calls.
 2. In each app's folder, `scripts/setup-app.sh <packages folder>` loads the image, installs the packed packages with
    the app's own package manager, builds the app's Storybooks and serves each one on its port.
-3. The [visual-check Action](https://github.com/visual-check/action) runs visual-check against the served Storybooks.
-4. The reusable workflow `.github/workflows/test-apps.yml` runs every app, and visual-check's CI calls it.
-5. One app also runs inside a job container, as a project whose CI runs in a container would.
+3. The [visual-check Action](https://github.com/visual-check/action) runs `test` against the served Storybooks and the
+   committed baselines.
+
+The reusable workflow `.github/workflows/test-apps.yml` runs every app. This repository's CI calls it, and so does
+visual-check's on every pull request. Its jobs:
+
+- The `app` matrix: react-inspector, dnd-kit and sb11, each through the Action.
+- The job container: react-inspector in `node:24-bookworm` with the docker CLI added, as a project whose CI runs in a
+  container would. The browser joins that container's network.
+- The sharded run: freecodecamp-ui, 3 shards plus its consistency job, through the Action's reusable workflow
+  `visual-check/action/.github/workflows/test.yml`.
+
+Stories disabled per app are listed in each `UPSTREAM.md`.
 
 ## Disabled stories
 
