@@ -11,6 +11,7 @@ published are installed and tested in. The spec is visual-check's
 | Folder | Upstream | Pinned commit | License | Storybook | Package manager | Storybooks and ports | Stories | Disabled stories |
 |---|---|---|---|---|---|---|---|---|
 | `react-inspector` | storybookjs/react-inspector | `ae89c6c` | MIT | 9.1.4 | Yarn 4.17.1 | `react-inspector` on 9001 | 76 | none |
+| `freecodecamp-ui` | freeCodeCamp/ui | `b0c467b` | BSD-3-Clause | 10.6.7 + addon | pnpm 12.21.0 | `freecodecamp-ui` on 6006 | 112 | none |
 
 ## A run
 
