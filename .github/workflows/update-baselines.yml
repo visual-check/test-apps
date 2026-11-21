@@ -1,0 +1,59 @@
+# Writes every app's baselines on Linux amd64, where the test apps' baselines come from (visual-check's
+# docs/prd/17-test-apps.md). Run it by hand on a branch, then download each app's artifact into its folder and commit
+# it, as README.md › Rewriting the baselines says. `update` is local only, so it runs without CI, then `test` checks the
+# result in CI's way. A story that breaks, or doesn't render the same way twice, fails the job, and the step summary
+# names it with its reason: disable it in its stories file, list it in the app's UPSTREAM.md, and run this again.
+name: Update baselines
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pack:
+    name: Pack
+    uses: visual-check/visual-check/.github/workflows/pack.yml@main
+
+  update:
+    name: Update (${{ matrix.app }})
+    needs: pack
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [react-inspector, freecodecamp-ui, dnd-kit, sb11]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: apps/${{ matrix.app }}/.nvmrc
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: visual-check-packages
+          path: ${{ runner.temp }}/packages
+      - name: Set up the app
+        working-directory: apps/${{ matrix.app }}
+        run: ../../scripts/setup-app.sh "$RUNNER_TEMP/packages"
+      - name: Update the baselines
+        working-directory: apps/${{ matrix.app }}
+        run: env -u CI ./node_modules/.bin/visual-check update --all
+      # A story `update` couldn't write has no baseline, so this fails too, on its consistency check.
+      - name: Test against them
+        if: ${{ !cancelled() }}
+        working-directory: apps/${{ matrix.app }}
+        run: ./node_modules/.bin/visual-check test
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: baselines-${{ matrix.app }}
+          path: |
+            apps/${{ matrix.app }}/.visual-check/baselines/
+            apps/${{ matrix.app }}/apps/*/.visual-check/baselines/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7

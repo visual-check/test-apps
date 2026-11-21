@@ -44,6 +44,24 @@ the loaded image through `TEST_APPS_IMAGE`, which each app's config reads.
 
 ## Rewriting the baselines
 
+Baselines are written on Linux amd64 by `.github/workflows/update-baselines.yml`, never locally.
+
+1. `gh workflow run update-baselines.yml -R visual-check/test-apps --ref <branch>`, then
+   `gh run watch -R visual-check/test-apps <run id>`.
+2. If a job fails, its step summary names each broken story and its reason. Disable each one:
+   - add `parameters: { ...visualCheck({ disable: true }) }` to the story;
+   - import `visualCheck` from its Storybook's `.storybook/visual-check` (a path relative to the stories file);
+   - merge it with any `parameters` the story already has;
+   - list the story with its reason under "Disabled stories" in the app's `UPSTREAM.md`;
+   - run the workflow again.
+
+   Do the same for a story that `test` later finds flaky. A story whose stories file fails to load can't be disabled
+   this way.
+3. Once every job is green, for each app:
+   `find apps/<app> -path '*/node_modules' -prune -o -type d -path '*/.visual-check/baselines' -print`, remove what it
+   lists, then `gh run download <run id> -R visual-check/test-apps -n baselines-<app> -D apps/<app>`.
+4. Review the images, then commit.
+
 ## Running an app locally
 
 ## Licenses
