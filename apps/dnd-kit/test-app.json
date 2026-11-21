@@ -1,0 +1,11 @@
+{
+  "build": "./node_modules/.bin/turbo run build --filter='./apps/stories*'",
+  "storybooks": [
+    { "port": 6006, "staticDir": "apps/stories/storybook-static" },
+    { "port": 6007, "staticDir": "apps/stories-vanilla/storybook-static" },
+    { "port": 6008, "staticDir": "apps/stories-vue/storybook-static" },
+    { "port": 6009, "staticDir": "apps/stories-solid/storybook-static" },
+    { "port": 6010, "staticDir": "apps/stories-svelte/storybook-static" }
+  ],
+  "addon": false
+}
