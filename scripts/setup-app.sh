@@ -27,6 +27,15 @@ tools=${RUNNER_TEMP:-${TMPDIR:-/tmp}}/test-apps-tools
 export HUSKY=0 SKIP_INSTALL_SIMPLE_GIT_HOOKS=1 STORYBOOK_DISABLE_TELEMETRY=1 TURBO_TELEMETRY_DISABLED=1
 export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 
+# test-app.json, read once so that set -e stops the script if it's missing or broken.
+build=$(node -p "require('./test-app.json').build")
+addon=$(node -p "require('./test-app.json').addon")
+storybooks=$(node -e "for (const { port, staticDir } of require('./test-app.json').storybooks) console.log(port, staticDir)")
+if [[ -z $storybooks ]]; then
+  echo 'test-app.json names no Storybooks.' >&2
+  exit 1
+fi
+
 # Copies the one packed tarball of @visual-check/<name> into the app as .visual-check-packages/<name>.tgz.
 copy_package() {
   local matches=("$packages/visual-check-$1-"[0-9]*.tgz)
@@ -67,7 +76,7 @@ export PATH="$tools/bin:$tools/node_modules/.bin:$PATH"
 echo '::endgroup::'
 
 names=(cli chromium storybook)
-if [[ $(node -p "require('./test-app.json').addon") == true ]]; then
+if [[ $addon == true ]]; then
   names+=(storybook-addon)
 fi
 mkdir -p .visual-check-packages
@@ -94,16 +103,16 @@ case $package_manager in
     for name in "${names[@]}"; do
       specs+=("./.visual-check-packages/$name.tgz")
     done
-    # Bun resolves a peer dependency, such as @visual-check/cli's on @visual-check/chromium, from the registry even
-    # when the same command adds it from a tarball. Overrides point every reference to the tarballs.
-    # shellcheck disable=SC2016 # The template literals are JavaScript's.
+    # Bun 1.3.11 resolves @visual-check/cli's peer dependency @visual-check/chromium from the registry even when
+    # chromium is installed from its tarball, in the same `bun add` or an earlier one. Overrides point it at the
+    # tarball. Drop them once Bun fixes this.
     node -e '
       const fs = require("fs");
       const manifest = JSON.parse(fs.readFileSync("package.json", "utf8"));
       manifest.overrides ??= {};
       for (const name of process.argv.slice(1))
-        manifest.overrides[`@visual-check/${name}`] = `file:./.visual-check-packages/${name}.tgz`;
-      fs.writeFileSync("package.json", `${JSON.stringify(manifest, null, 2)}\n`);
+        manifest.overrides["@visual-check/" + name] = "file:./.visual-check-packages/" + name + ".tgz";
+      fs.writeFileSync("package.json", JSON.stringify(manifest, null, 2) + "\n");
     ' "${names[@]}"
     bun add --dev "${specs[@]}"
     ;;
@@ -115,19 +124,34 @@ esac
 echo '::endgroup::'
 
 echo '::group::Build the Storybooks'
-bash -c "$(node -p "require('./test-app.json').build")"
+bash -c "$build"
 echo '::endgroup::'
 
+# Each server's port and process ID, so that a server that exits, such as one whose port is taken, fails the script
+# at once. A server that already answers on a port, such as one left from an earlier run, would pass for the new one,
+# so it fails the script first.
 ports=()
+pids=()
 while read -r port static_dir; do
+  if curl --silent --max-time 5 --output /dev/null "http://127.0.0.1:$port/"; then
+    echo "Something already answers on port $port." >&2
+    exit 1
+  fi
   http-server "$static_dir" -p "$port" -a 127.0.0.1 -s > "$tools/http-server-$port.log" 2>&1 &
   ports+=("$port")
-done < <(node -e "for (const { port, staticDir } of require('./test-app.json').storybooks) console.log(port, staticDir)")
+  pids+=("$!")
+done <<< "$storybooks"
 
-for port in "${ports[@]}"; do
+for i in "${!ports[@]}"; do
+  port=${ports[$i]}
   url="http://127.0.0.1:$port/index.json"
   for _ in $(seq 60); do
-    if curl --silent --fail --output /dev/null "$url"; then
+    if ! kill -0 "${pids[$i]}" 2> /dev/null; then
+      echo "The server for $url exited:" >&2
+      cat "$tools/http-server-$port.log" >&2
+      exit 1
+    fi
+    if curl --silent --fail --max-time 5 --output /dev/null "$url"; then
       echo "Serving $url"
       continue 2
     fi
