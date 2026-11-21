@@ -60,3 +60,13 @@ jobs:
           include-hidden-files: true
           if-no-files-found: warn
           retention-days: 7
+      # test's report, with the images of each story that differs from the baseline update just wrote, to locate a flaky
+      # story. update itself writes no report.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ failure() && steps.setup.outcome == 'success' }}
+        with:
+          name: report-${{ matrix.app }}
+          path: apps/${{ matrix.app }}/.visual-check/report/
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
