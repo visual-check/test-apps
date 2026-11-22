@@ -40,6 +40,8 @@ the 22.17 visual-check needs. The visual-check packages are installed only at ru
 - `apps/stories/stories/react/Sortable/Virtualized/Virtualized.stories.tsx`: the story under "Disabled stories" gets
   `parameters: { ...visualCheck({disable: true}) }`, and the file imports `visualCheck` from
   `../../../../.storybook/visual-check`.
+- `packages/storybook-addon-codesandbox/src/preset.ts`: the manager entry's path comes from `fileURLToPath`. Upstream's
+  `URL.pathname` is `/D:/…` on Windows, which isn't a path there.
 
 ## Disabled stories
 
