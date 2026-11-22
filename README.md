@@ -38,6 +38,8 @@ visual-check's on every pull request. Its jobs:
   Windows job installs Docker Desktop first, with visual-check's `docker-desktop` action.
 - The job container: react-inspector in `node:24-bookworm` with the docker CLI added, as a project whose CI runs in a
   container would. The browser joins that container's network.
+- WSL: react-inspector from inside Ubuntu 24.04 in WSL on a Windows runner, with Docker Desktop's WSL integration. It's
+  a plain step, `scripts/run-in-wsl.sh`, because no Action can run in the distro.
 - The sharded run: freecodecamp-ui, 3 shards plus its consistency job, through the Action's reusable workflow
   `visual-check/action/.github/workflows/test.yml`.
 
