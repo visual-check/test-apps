@@ -21,6 +21,9 @@ fi
 
 packages=$(cd "$1" && pwd)
 tools=${RUNNER_TEMP:-${TMPDIR:-/tmp}}/test-apps-tools
+mkdir -p "$tools/bin"
+# In Git Bash, RUNNER_TEMP is a Windows path, whose colon would split PATH. pwd gives the POSIX form.
+tools=$(cd "$tools" && pwd)
 
 # Upstream's git hooks would install into this repository's .git. Storybook's and Turborepo's telemetry would reach
 # the network.
@@ -63,6 +66,7 @@ copy_package() {
 }
 
 echo '::group::Load the browser image'
+docker info --format 'Docker {{.ServerVersion}} on {{.OperatingSystem}}'
 image=$(docker load --input "$packages/chromium-image.tar.gz" | sed -n 's/^Loaded image: //p' | tail -n 1)
 if [[ -z $image ]]; then
   echo "docker load named no image from $packages/chromium-image.tar.gz." >&2
@@ -79,7 +83,6 @@ package_manager_spec=$(node -p "require('./package.json').packageManager.split('
 package_manager=${package_manager_spec%%@*}
 
 echo "::group::Install $package_manager_spec and http-server"
-mkdir -p "$tools/bin"
 if [[ $package_manager == bun ]]; then
   npm install --prefix "$tools" --no-audit --no-fund http-server@14.1.1 "$package_manager_spec"
 else
