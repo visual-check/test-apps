@@ -2,7 +2,8 @@
 # installs the packages with its own package manager, builds and serves its Storybooks with scripts/setup-app.sh, and
 # runs `test` against its committed baselines through visual-check/action. freecodecamp-ui runs through the Action's
 # reusable workflow, sharded, with its consistency job. react-inspector also runs from a node job container with the
-# docker CLI added, where the browser joins that container's network.
+# docker CLI added, where the browser joins that container's network. On Windows every app runs through Docker Desktop,
+# from the Windows host and unsharded.
 #
 # This repository's CI calls it, and so does visual-check's on every pull request. A workflow called from another
 # repository's workflow gets that repository's github context, so every checkout here names this repository: that
@@ -27,7 +28,7 @@ defaults:
     shell: bash
 
 jobs:
-  # Each app through the Action. Windows adds a windows-2025 entry per app (visual-check#86).
+  # Each app through the Action. freecodecamp-ui's Linux run is the sharded one below.
   app:
     name: ${{ matrix.app }} (${{ matrix.runner }})
     runs-on: ${{ matrix.runner }}
@@ -39,6 +40,10 @@ jobs:
           - { app: react-inspector, runner: ubuntu-24.04 }
           - { app: dnd-kit, runner: ubuntu-24.04 }
           - { app: sb11, runner: ubuntu-24.04 }
+          - { app: react-inspector, runner: windows-2025 }
+          - { app: freecodecamp-ui, runner: windows-2025 }
+          - { app: dnd-kit, runner: windows-2025 }
+          - { app: sb11, runner: windows-2025 }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -51,6 +56,9 @@ jobs:
         with:
           name: ${{ inputs.artifact }}
           path: ${{ runner.temp }}/packages
+      - name: Install Docker Desktop
+        if: runner.os == 'Windows'
+        uses: visual-check/visual-check/.github/actions/docker-desktop@main
       - name: Set up the app
         working-directory: apps/${{ matrix.app }}
         run: ../../scripts/setup-app.sh "$RUNNER_TEMP/packages"

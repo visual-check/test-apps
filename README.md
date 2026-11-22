@@ -34,7 +34,8 @@ prerelease, then to 11's stable releases, and leaves everything else alone. Reno
 The reusable workflow `.github/workflows/test-apps.yml` runs every app. This repository's CI calls it, and so does
 visual-check's on every pull request. Its jobs:
 
-- The `app` matrix: react-inspector, dnd-kit and sb11, each through the Action.
+- The `app` matrix: react-inspector, dnd-kit and sb11 on Linux, and every app on Windows, each through the Action. A
+  Windows job installs Docker Desktop first, with visual-check's `docker-desktop` action.
 - The job container: react-inspector in `node:24-bookworm` with the docker CLI added, as a project whose CI runs in a
   container would. The browser joins that container's network.
 - The sharded run: freecodecamp-ui, 3 shards plus its consistency job, through the Action's reusable workflow
