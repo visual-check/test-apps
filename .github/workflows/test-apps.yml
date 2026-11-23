@@ -2,7 +2,8 @@
 # installs the packages with its own package manager, builds and serves its Storybooks with scripts/setup-app.sh, and
 # runs `test` against its committed baselines through visual-check/action. freecodecamp-ui runs through the Action's
 # reusable workflow, sharded, with its consistency job. react-inspector also runs from a node job container with the
-# docker CLI added, where the browser joins that container's network.
+# docker CLI added, where the browser joins that container's network. On Windows every app runs through Docker Desktop,
+# from the Windows host and unsharded, and react-inspector also runs from inside a WSL distro.
 #
 # This repository's CI calls it, and so does visual-check's on every pull request. A workflow called from another
 # repository's workflow gets that repository's github context, so every checkout here names this repository: that
@@ -27,7 +28,7 @@ defaults:
     shell: bash
 
 jobs:
-  # Each app through the Action. Windows adds a windows-2025 entry per app (visual-check#86).
+  # Each app through the Action. freecodecamp-ui's Linux run is the sharded one below.
   app:
     name: ${{ matrix.app }} (${{ matrix.runner }})
     runs-on: ${{ matrix.runner }}
@@ -39,6 +40,10 @@ jobs:
           - { app: react-inspector, runner: ubuntu-24.04 }
           - { app: dnd-kit, runner: ubuntu-24.04 }
           - { app: sb11, runner: ubuntu-24.04 }
+          - { app: react-inspector, runner: windows-2025 }
+          - { app: freecodecamp-ui, runner: windows-2025 }
+          - { app: dnd-kit, runner: windows-2025 }
+          - { app: sb11, runner: windows-2025 }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -51,6 +56,9 @@ jobs:
         with:
           name: ${{ inputs.artifact }}
           path: ${{ runner.temp }}/packages
+      - name: Install Docker Desktop
+        if: runner.os == 'Windows'
+        uses: visual-check/visual-check/.github/actions/docker-desktop@main
       - name: Set up the app
         working-directory: apps/${{ matrix.app }}
         run: ../../scripts/setup-app.sh "$RUNNER_TEMP/packages"
@@ -66,6 +74,52 @@ jobs:
         with:
           name: test-apps-report-${{ matrix.app }}-${{ matrix.runner }}
           path: apps/${{ matrix.app }}/.visual-check/report/
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # The CLI inside the distro uses Docker Desktop's engine, so the browser goes through the proxy. The proxy listens on
+  # the distro's loopback, which Windows forwards its own to. visual-check runs in a plain step, because no Action can
+  # run in the distro.
+  wsl:
+    name: react-inspector (WSL)
+    runs-on: windows-2025
+    timeout-minutes: 30
+    env:
+      DISTRO: Ubuntu-24.04
+      # wsl.exe writes its own messages as UTF-16 when redirected, which the log can't show.
+      WSL_UTF8: 1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: visual-check/test-apps
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ inputs.artifact }}
+          path: .packages
+      # WSL checks its download against the SHA-256 that Microsoft's list of distros names. The distro is installed
+      # before Docker Desktop, whose integration it has to be there for.
+      - name: Install the distro
+        shell: pwsh
+        run: wsl.exe --install $env:DISTRO --no-launch
+      - name: Install Docker Desktop
+        uses: visual-check/visual-check/.github/actions/docker-desktop@main
+        with:
+          wsl-distro: ${{ env.DISTRO }}
+      # WSLENV hands CI to the distro, and the step summary's path as the distro sees it. Git Bash could rewrite WSLENV
+      # as a list of paths, so the step runs in PowerShell. The distro starts in this step's folder.
+      - name: Run react-inspector in the distro
+        shell: pwsh
+        env:
+          WSLENV: CI/u:GITHUB_STEP_SUMMARY/up
+        run: wsl.exe -d $env:DISTRO -u root -e bash scripts/run-in-wsl.sh react-inspector .packages
+      - name: Upload the report
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-apps-report-react-inspector-wsl
+          path: apps/react-inspector/.visual-check/report/
           include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 7

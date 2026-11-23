@@ -1,3 +1,5 @@
+import {fileURLToPath} from 'node:url';
+
 export const managerEntries = [
-  new URL('./manager.tsx', import.meta.url).pathname,
+  fileURLToPath(new URL('./manager.tsx', import.meta.url)),
 ];
