@@ -9,9 +9,8 @@
 # as visual-check-cli-0.0.0.tgz, and the browser image as chromium-image.tar.gz. The app's test-app.json names its
 # build command, each Storybook's port and static build, and whether it takes the addon.
 #
-# Until visual-check#95 publishes the browser image and the browser package, the app installs the packed browser
-# package, and its config names the loaded image through TEST_APPS_IMAGE, which this script hands to later steps
-# through GITHUB_ENV.
+# The app installs the packed browser package, and its config names the loaded image through TEST_APPS_IMAGE, which
+# this script hands to later steps through GITHUB_ENV.
 set -euo pipefail
 
 if [[ $# -ne 1 ]]; then
