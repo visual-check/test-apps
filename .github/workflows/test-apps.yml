@@ -7,7 +7,8 @@
 #
 # This repository's CI calls it, and so does visual-check's on every pull request. A workflow called from another
 # repository's workflow gets that repository's github context, so every checkout here names this repository: that
-# gives the caller's commit when this repository calls it, and main otherwise.
+# gives the caller's commit when this repository calls it, and main otherwise. A visual-check branch's run takes the
+# branch of this repository named like it, when there is one.
 name: Test apps
 
 on:
@@ -28,9 +29,46 @@ defaults:
     shell: bash
 
 jobs:
+  # The branch of this repository the jobs check out. A visual-check pull request whose browser bump moves pixels runs
+  # the test apps from a branch here named like its own, which holds the rewritten baselines. Otherwise, and in this
+  # repository's own runs, each checkout takes its default: the caller's commit here, and main for visual-check.
+  ref:
+    name: Test apps branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      ref: ${{ steps.ref.outputs.ref }}
+    steps:
+      - name: Find a branch named like the caller's
+        id: ref
+        env:
+          CALLER: ${{ github.repository }}
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          ref=
+          if [[ $CALLER != visual-check/test-apps && $BRANCH != main ]]; then
+            status=0
+            git ls-remote --exit-code --heads https://github.com/visual-check/test-apps.git "refs/heads/$BRANCH" \
+              > /dev/null || status=$?
+            case $status in
+              0) ref=$BRANCH ;;
+              2) ;;
+              *)
+                echo "::error::git ls-remote failed with exit code $status."
+                exit 1
+                ;;
+            esac
+          fi
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          if [[ -n $ref ]]; then
+            echo "The test apps run from visual-check/test-apps@$ref, the branch named like this run's." \
+              | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+
   # Each app through the Action. freecodecamp-ui's Linux run is the sharded one below.
   app:
     name: ${{ matrix.app }} (${{ matrix.runner }})
+    needs: ref
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 30
     strategy:
@@ -48,6 +86,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: visual-check/test-apps
+          ref: ${{ needs.ref.outputs.ref }}
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -83,6 +122,7 @@ jobs:
   # run in the distro.
   wsl:
     name: react-inspector (WSL)
+    needs: ref
     runs-on: windows-2025
     timeout-minutes: 30
     env:
@@ -93,6 +133,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: visual-check/test-apps
+          ref: ${{ needs.ref.outputs.ref }}
           persist-credentials: false
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
@@ -128,6 +169,7 @@ jobs:
   # its network, where the Storybook is served on loopback.
   job-container:
     name: react-inspector (node job container)
+    needs: ref
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     container:
@@ -136,6 +178,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: visual-check/test-apps
+          ref: ${{ needs.ref.outputs.ref }}
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -178,9 +221,11 @@ jobs:
   # setting the app up itself. Their report artifacts' names already differ by shard.
   sharded:
     name: freecodecamp-ui, sharded
-    uses: visual-check/action/.github/workflows/test.yml@d22b2b78c1f46774f69318e08a855300c9df4fee # main
+    needs: ref
+    uses: visual-check/action/.github/workflows/test.yml@5957e74c10c31c2d931f516106e18695b4c340a4 # main
     with:
       repository: visual-check/test-apps
+      ref: ${{ needs.ref.outputs.ref }}
       artifact: ${{ inputs.artifact }}
       shards: 3
       node-version-file: apps/freecodecamp-ui/.nvmrc

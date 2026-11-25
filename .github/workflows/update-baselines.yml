@@ -3,10 +3,20 @@
 # it, as README.md › Rewriting the baselines says. `update` is local only, so it runs without CI, then `test` checks the
 # result in CI's way. A story that breaks, or doesn't render the same way twice, fails the job, and the step summary
 # names it with its reason: disable it in its stories file, list it in the app's UPSTREAM.md, and run this again.
+#
+# On a browser bump, run it on the branch here named like the bump's, with visual-check-ref set to that branch, so the
+# baselines come from the bump's browser package and image.
 name: Update baselines
 
 on:
   workflow_dispatch:
+    inputs:
+      visual-check-ref:
+        description: >-
+          The visual-check branch, tag or commit to pack, so the baselines come from its browser package and image.
+          Empty packs main.
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -15,6 +25,8 @@ jobs:
   pack:
     name: Pack
     uses: visual-check/visual-check/.github/workflows/pack.yml@main
+    with:
+      ref: ${{ inputs.visual-check-ref }}
 
   update:
     name: Update (${{ matrix.app }})

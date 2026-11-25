@@ -50,11 +50,13 @@ Stories disabled per app are listed in each `UPSTREAM.md`.
 A story that breaks, or doesn't render the same way twice, gets `visualCheck({ disable: true })` in its stories file.
 Each one is listed with its reason in the app's `UPSTREAM.md`. Every other story runs, with no filters.
 
-## Interim browser package and image
+## Browser package and image
 
-Until [visual-check#95](https://github.com/visual-check/visual-check/issues/95) publishes them, each app installs the
-packed `@visual-check/chromium`, and the browser image is loaded from the pack artifact. `scripts/setup-app.sh` names
-the loaded image through `TEST_APPS_IMAGE`, which each app's config reads.
+Each app installs the packed `@visual-check/chromium` and loads the browser image from the pack artifact.
+`scripts/setup-app.sh` names the loaded image through `TEST_APPS_IMAGE`, which each app's config reads. On a
+visual-check browser bump's pull request, that image is the candidate its Browser package workflow pushed, which
+merging publishes. Installing the browser package from npm, as visual-check's PRD 17 › A run has it, waits for a
+browser package on npm.
 
 ## Rewriting the baselines
 
@@ -75,6 +77,15 @@ Baselines are written on Linux amd64 by `.github/workflows/update-baselines.yml`
    `find apps/<app> -path '*/node_modules' -prune -o -type d -path '*/.visual-check/baselines' -print`, remove what it
    lists, then `gh run download <run id> -R visual-check/test-apps -n baselines-<app> -D apps/<app>`.
 4. Review the images, then commit.
+
+### For a browser bump
+
+1. Create and push a branch named exactly like the visual-check bump pull request's branch, `chromium-bump/<chromium>`.
+2. `gh workflow run update-baselines.yml -R visual-check/test-apps --ref <branch> -f visual-check-ref=<branch>`, then
+   steps 2–4 above on that branch, and push.
+3. In visual-check, re-run all jobs of the bump pull request's CI and Browser package runs. Their test apps run from
+   this branch.
+4. Merge the bump pull request, then this branch.
 
 ## Running an app locally
 
