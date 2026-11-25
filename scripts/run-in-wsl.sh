@@ -17,12 +17,30 @@ packages=$(cd "$2" && pwd)
 checkout=$PWD
 copy=$HOME/test-apps
 
-# Only Docker Desktop's engine takes the proxy. Any other engine in the distro would use host networking and pass.
-engine=$(docker info --format '{{.OperatingSystem}}')
-if [[ $engine != 'Docker Desktop' ]]; then
-  echo "docker runs on $engine, not on Docker Desktop." >&2
+# Docker Engine from Ubuntu's archive, started here: the distro may run no systemd. dockerd lives as long as this
+# script's wsl.exe call, which runs the whole check.
+apt-get -o Acquire::Retries=5 update
+DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Retries=5 install --yes --no-install-recommends docker.io
+if ! docker info >/dev/null 2>&1; then
+  dockerd >/var/log/dockerd.log 2>&1 &
+fi
+for _ in $(seq 60); do
+  docker info >/dev/null 2>&1 && break
+  sleep 1
+done
+if ! docker info >/dev/null 2>&1; then
+  tail -n 50 /var/log/dockerd.log >&2 || true
+  echo "Docker Engine didn't answer within 60 s." >&2
   exit 1
 fi
+
+# The browser has to take host networking, as with any engine in the distro but Docker Desktop's.
+engine=$(docker info --format '{{.OperatingSystem}}')
+if [[ $engine == 'Docker Desktop' ]]; then
+  echo 'docker runs on Docker Desktop, not on Docker Engine in the distro.' >&2
+  exit 1
+fi
+echo "docker runs on $engine."
 
 # Node's own tarball, checked against its SHASUMS256.txt.
 node_version=24.22.3
