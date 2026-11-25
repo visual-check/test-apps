@@ -2,8 +2,8 @@
 # installs the packages with its own package manager, builds and serves its Storybooks with scripts/setup-app.sh, and
 # runs `test` against its committed baselines through visual-check/action. freecodecamp-ui runs through the Action's
 # reusable workflow, sharded, with its consistency job. react-inspector also runs from a node job container with the
-# docker CLI added, where the browser joins that container's network. On Windows every app runs through Docker Desktop,
-# from the Windows host and unsharded, and react-inspector also runs from inside a WSL distro.
+# docker CLI added, where the browser joins that container's network. On Windows, react-inspector runs from inside a
+# WSL distro with Docker Engine in it. No job installs Docker Desktop, whose install hangs Windows runners.
 #
 # This repository's CI calls it, and so does visual-check's on every pull request. A workflow called from another
 # repository's workflow gets that repository's github context, so every checkout here names this repository: that
@@ -78,10 +78,6 @@ jobs:
           - { app: react-inspector, runner: ubuntu-24.04 }
           - { app: dnd-kit, runner: ubuntu-24.04 }
           - { app: sb11, runner: ubuntu-24.04 }
-          - { app: react-inspector, runner: windows-2025 }
-          - { app: freecodecamp-ui, runner: windows-2025 }
-          - { app: dnd-kit, runner: windows-2025 }
-          - { app: sb11, runner: windows-2025 }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -95,9 +91,6 @@ jobs:
         with:
           name: ${{ inputs.artifact }}
           path: ${{ runner.temp }}/packages
-      - name: Install Docker Desktop
-        if: runner.os == 'Windows'
-        uses: visual-check/visual-check/.github/actions/docker-desktop@main
       - name: Set up the app
         working-directory: apps/${{ matrix.app }}
         run: ../../scripts/setup-app.sh "$RUNNER_TEMP/packages"
@@ -117,9 +110,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  # The CLI inside the distro uses Docker Desktop's engine, so the browser goes through the proxy. The proxy listens on
-  # the distro's loopback, which Windows forwards its own to. visual-check runs in a plain step, because no Action can
-  # run in the distro.
+  # The CLI inside the distro uses Docker Engine installed in the distro, so the browser uses host networking and
+  # reaches the Storybook on the distro's loopback. visual-check runs in a plain step, because no Action can run in the
+  # distro.
   wsl:
     name: react-inspector (WSL)
     needs: ref
@@ -139,15 +132,10 @@ jobs:
         with:
           name: ${{ inputs.artifact }}
           path: .packages
-      # WSL checks its download against the SHA-256 that Microsoft's list of distros names. The distro is installed
-      # before Docker Desktop, whose integration it has to be there for.
+      # WSL checks its download against the SHA-256 that Microsoft's list of distros names.
       - name: Install the distro
         shell: pwsh
         run: wsl.exe --install $env:DISTRO --no-launch
-      - name: Install Docker Desktop
-        uses: visual-check/visual-check/.github/actions/docker-desktop@main
-        with:
-          wsl-distro: ${{ env.DISTRO }}
       # WSLENV hands CI to the distro, and the step summary's path as the distro sees it. Git Bash could rewrite WSLENV
       # as a list of paths, so the step runs in PowerShell. The distro starts in this step's folder.
       - name: Run react-inspector in the distro
