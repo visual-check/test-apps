@@ -3,6 +3,7 @@ import type {Meta, StoryObj} from 'storybook-solidjs';
 import MultipleListsApp from './MultipleListsApp.tsx';
 import multipleListsSource from './MultipleListsApp.tsx?raw';
 import {baseStyles, sortableStyles, multipleListsStyles} from '@dnd-kit/stories-shared/styles/sandbox';
+import {visualCheck} from '../../../.storybook/visual-check';
 
 const styles = [baseStyles, sortableStyles, multipleListsStyles].join('\n\n');
 
@@ -23,6 +24,7 @@ export const BasicSetup: Story = {
     </>
   ),
   parameters: {
+    ...visualCheck({allowOverflow: true}),
     codesandbox: {
       files: {
         'src/App.tsx': multipleListsSource,

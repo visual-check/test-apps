@@ -6,6 +6,7 @@ import multipleListsSource from './MultipleListsApp.vue?raw';
 import sortableColumnSource from './SortableColumn.vue?raw';
 import sortableItemSource from './SortableItem.vue?raw';
 import {baseStyles, sortableStyles, multipleListsStyles} from '@dnd-kit/stories-shared/styles/sandbox';
+import {visualCheck} from '../../../.storybook/visual-check';
 
 const styles = [baseStyles, sortableStyles, multipleListsStyles].join('\n\n');
 
@@ -25,6 +26,7 @@ export const BasicSetup: Story = {
     },
   }),
   parameters: {
+    ...visualCheck({allowOverflow: true}),
     codesandbox: {
       files: {
         'src/App.vue': multipleListsSource,
