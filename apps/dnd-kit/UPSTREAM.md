@@ -40,6 +40,9 @@ the 22.17 visual-check needs. The visual-check packages are installed only at ru
 - `apps/stories/stories/react/Sortable/Virtualized/Virtualized.stories.tsx`: the story under "Disabled stories" gets
   `parameters: { ...visualCheck({disable: true}) }`, and the file imports `visualCheck` from
   `../../../../.storybook/visual-check`.
+- The stories under "Overflow allowed" get `visualCheck({allowOverflow: true})`: on the meta for the horizontal list
+  files, whose every story overflows, and merged into the story's `parameters` for the multiple lists ones. Each file
+  imports `visualCheck` from its Storybook's `.storybook/visual-check`.
 - `packages/storybook-addon-codesandbox/src/preset.ts`: the manager entry's path comes from `fileURLToPath`. Upstream's
   `URL.pathname` is `/D:/…` on Windows, which isn't a path there.
 
@@ -53,3 +56,21 @@ That's the story's own size, not a visual-check bug; it stays disabled.
 | Storybook | Story ID | File | Reason | Message |
 |---|---|---|---|---|
 | `stories` | `react-sortable-virtualized--react-virtual` | `apps/stories/stories/react/Sortable/Virtualized/Virtualized.stories.tsx` | `too-tall` | The capture is 1280 × 72064 device pixels, over 32,767 on a side. |
+
+## Overflow allowed
+
+These stories show more than the 1280 px viewport is wide, so visual-check breaks them, `overflows`, unless they set
+`allowOverflow`. The cut is upstream's layout, not a visual-check bug, and their baselines already are the page cut at
+the viewport's right edge, so they set it and keep their baselines.
+
+| Storybook | Stories | File | Content past the viewport's right edge |
+|---|---|---|---|
+| `stories` | every story of `react-sortable-horizontal-list` | `apps/stories/stories/react/Sortable/Horizontal/Horizontal.stories.tsx` | 16 to 1748 px: a horizontal list wider than the viewport |
+| `stories` | `react-sortable-multiple-lists--example` | `apps/stories/stories/react/Sortable/MultipleLists/MultipleLists.stories.tsx` | 16 px |
+| `stories-vanilla` | every story of `sortable-horizontal-list` | `apps/stories-vanilla/stories/Sortable/Horizontal/Horizontal.stories.ts` | 656 to 758 px |
+| `stories-vue` | every story of `sortable-horizontal-list` | `apps/stories-vue/stories/Sortable/Horizontal/Horizontal.stories.ts` | 656 to 758 px |
+| `stories-vue` | `sortable-multiple-lists--basic-setup` | `apps/stories-vue/stories/Sortable/MultipleLists/MultipleLists.stories.ts` | 16 px |
+| `stories-solid` | every story of `sortable-horizontal-list` | `apps/stories-solid/stories/Sortable/Horizontal/Horizontal.stories.tsx` | 656 to 758 px |
+| `stories-solid` | `sortable-multiple-lists--basic-setup` | `apps/stories-solid/stories/Sortable/MultipleLists/MultipleLists.stories.tsx` | 16 px |
+| `stories-svelte` | every story of `sortable-horizontal-list` | `apps/stories-svelte/stories/Sortable/Horizontal/Horizontal.stories.ts` | 656 to 758 px |
+| `stories-svelte` | `sortable-multiple-lists--basic-setup` | `apps/stories-svelte/stories/Sortable/MultipleLists/MultipleLists.stories.ts` | 16 px |

@@ -3,9 +3,11 @@ import type {Meta, StoryObj} from '@storybook/html-vite';
 import App from './HorizontalSortableApp.ts';
 import horizontalSortableSource from './HorizontalSortableApp.ts?raw';
 import {baseStyles, sortableStyles} from '@dnd-kit/stories-shared/styles/sandbox';
+import {visualCheck} from '../../../.storybook/visual-check';
 
 const meta: Meta = {
   title: 'Sortable/Horizontal list',
+  parameters: {...visualCheck({allowOverflow: true})},
 };
 
 export default meta;

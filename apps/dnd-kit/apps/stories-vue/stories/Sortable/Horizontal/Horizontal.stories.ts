@@ -3,9 +3,11 @@ import type {Meta, StoryObj} from '@storybook/vue3-vite';
 import HorizontalSortableApp from './HorizontalSortableApp.vue';
 import horizontalSortableSource from './HorizontalSortableApp.vue?raw';
 import {baseStyles, sortableStyles} from '@dnd-kit/stories-shared/styles/sandbox';
+import {visualCheck} from '../../../.storybook/visual-check';
 
 const meta: Meta = {
   title: 'Sortable/Horizontal list',
+  parameters: {...visualCheck({allowOverflow: true})},
 };
 
 export default meta;

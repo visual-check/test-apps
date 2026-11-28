@@ -9,6 +9,7 @@ import {
   sortableStyles,
   multipleListsStyles,
 } from '@dnd-kit/stories-shared/styles/sandbox';
+import {visualCheck} from '../../../.storybook/visual-check';
 
 const styles = [baseStyles, sortableStyles, multipleListsStyles].join('\n\n');
 
@@ -23,6 +24,7 @@ type Story = StoryObj<typeof MultipleListsApp>;
 export const BasicSetup: Story = {
   name: 'Basic setup',
   parameters: {
+    ...visualCheck({allowOverflow: true}),
     codesandbox: {
       files: {
         'src/App.svelte': multipleListsSource,

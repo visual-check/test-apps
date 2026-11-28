@@ -8,9 +8,11 @@ import {
   baseStyles,
   sortableStyles,
 } from '@dnd-kit/stories-shared/styles/sandbox';
+import {visualCheck} from '../../../.storybook/visual-check';
 
 const meta: Meta = {
   title: 'Sortable/Horizontal list',
+  parameters: {...visualCheck({allowOverflow: true})},
 };
 
 export default meta;

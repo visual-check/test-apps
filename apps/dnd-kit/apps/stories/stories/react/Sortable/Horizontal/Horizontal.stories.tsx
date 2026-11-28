@@ -5,9 +5,11 @@ import {Feedback} from '@dnd-kit/dom';
 import {SortableExample} from '../SortableExample';
 import horizontalSortableSource from './HorizontalSortableApp.tsx?raw';
 import {baseStyles, sortableStyles} from '@dnd-kit/stories-shared/styles/sandbox';
+import {visualCheck} from '../../../../.storybook/visual-check';
 
 const meta: Meta<typeof SortableExample> = {
   title: 'React/Sortable/Horizontal list',
+  parameters: {...visualCheck({allowOverflow: true})},
   component: SortableExample,
 };
 

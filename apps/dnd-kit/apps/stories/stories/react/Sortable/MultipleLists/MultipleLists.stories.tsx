@@ -5,6 +5,7 @@ import MultipleListsApp from './MultipleListsApp';
 import docs from './docs/MultipleLists.mdx';
 import multipleListsSource from './MultipleListsApp.tsx?raw';
 import {baseStyles, sortableStyles, multipleListsStyles} from '@dnd-kit/stories-shared/styles/sandbox';
+import {visualCheck} from '../../../../.storybook/visual-check';
 
 const meta: Meta<typeof MultipleLists> = {
   title: 'React/Sortable/Multiple lists',
@@ -24,6 +25,7 @@ export const Example: Story = {
   name: 'Example',
   render: () => <MultipleListsApp />,
   parameters: {
+    ...visualCheck({allowOverflow: true}),
     codesandbox: {
       files: {
         'src/App.tsx': multipleListsSource,
